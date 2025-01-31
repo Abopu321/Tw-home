@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE WARLORDS - Elite Gaming Clan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ffd700;
+            --secondary: #ff3e3e;
+            --dark: #111;
+            --light: #fff;
+            --neon-glow: 0 0 10px rgba(255,215,0,0.5);
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #000;
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .header-content {
+            z-index: 2;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .header-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+
+        .clan-logo-name {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .clan-logo {
+            width: 150px;
+            margin-bottom: 1rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .clan-name {
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: var(--neon-glow);
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        .clan-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: var(--neon-glow);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .nav.scrolled {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            height: 50px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Sections */
+        section {
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: var(--neon-glow);
+        }
+
+        /* Clan Details Section */
+        .clan-details {
+            background: linear-gradient(45deg, #000, #111);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .clan-details-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .clan-detail-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.3s ease;
+            flex-basis: calc(25% - 2rem);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .clan-detail-item:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(255,215,0,0.2);
+        }
+
+        .clan-detail-item i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Features Section */
+        .features {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .feature {
+            flex-basis: calc(33.333% - 2rem);
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255,215,0,0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Requirements Section */
+        .requirements {
+            background: linear-gradient(45deg, #000, #111);
+            padding: 4rem 2rem;
+        }
+
+        .requirement-list {
+            list-style-type: none;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .requirement-list li {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .requirement-list li::before {
+            content: '✓';
+            color: var(--primary);
+            position: absolute;
+            left: 0;
+        }
+
+        /* Join Section */
+        .join-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+        }
+
+        .recruitment-form {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            width: 100%;
+            display: none;
+            animation: formSlideIn 0.5s ease forwards;
+            position: relative;
+        }
+
+        .recruitment-form.active {
+            display: block;
+        }
+
+        .close-form {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: var(--light);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-form:hover {
+            color: var(--secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid var(--primary);
+            color: var(--light);
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: var(--neon-glow);
+        }
+
+        /* Footer */
+        .footer {
+            background: #111;
+            padding: 2rem;
+            text-align: center;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .social-icons {
+            margin-bottom: 1rem;
+        }
+
+        .social-icons a {
+            color: var(--light);
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* Buttons */
+        .cyberpunk-button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .cyberpunk-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+        }
+
+        .cyberpunk-button:hover::before {
+            left: 100%;
+        }
+
+        .cyberpunk-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+
+        /* AI Chatbot */
+        .ai-chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .ai-chatbot-button {
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 1rem;
+            font-size: 1rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .ai-chatbot-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Hover Effects */
+        .feature:hover .feature-icon {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        .social-icons a:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Background Animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: move 3s linear infinite;
+        }
+
+        @keyframes move {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 10px var(--primary); }
+            to { text-shadow: 0 0 20px var(--primary), 0 0 30px var(--secondary); }
+        }
+
+        @keyframes formSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,255,0,0.2);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Discover More Section */
+        .discover-more {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(45deg, #000, #111);
+        }
+
+        .coming-soon-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,215,0,0.2);
+            color: var(--light);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Scroll Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .clan-name {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .feature {
+                flex-basis: 100%;
+            }
+
+            .clan-detail-item {
+                flex-basis: calc(50% - 2rem);
+            }
+        }
+
+        #clan-details, #features, #requirements {
+            background: linear-gradient(45deg, #000, #222);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="mainNav">
+        <div class="nav-content">
+            <img src="https://iili.io/2QETmvI.png" alt="THE WARLORDS Logo" class="nav-logo">
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#clan-details">Clan Details</a>
+                <a href="#features">Features</a>
+                <a href="#requirements">Requirements</a>
+                <a href="#join">Join Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="header" id="home">
+        <video class="header-video" autoplay muted loop>
+            <source src="logo.mp4" type="video/mp4">
+        </video>
+        
+        <div class="header-content">
+            <div class="clan-logo-name">
+                <img src="https://iili.io/2QETmvI.png" alt="THE WARLORDS Logo" class="clan-logo">
+                <h1 class="clan-name">THE WARLORDS</h1>
+            </div>
+            <p class="clan-title">Elite Level 10 Call of Duty Clan</p>
+            <button class="cyberpunk-button" id="joinButton">Join The Elite</button>
+        </div>
+    </header>
+
+    <!-- Clan Details Section -->
+    <section id="clan-details" class="clan-details">
+        <h2 class="section-title fade-in">Clan Details</h2>
+        <div class="clan-details-content">
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-users"></i>
+                <h3>Clan Name</h3>
+                <p>THE WARLORDS</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-id-badge"></i>
+                <h3>Clan ID</h3>
+                <p>TW#12345</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-star"></i>
+                <h3>Clan Level</h3>
+                <p>10</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Founded</h3>
+                <p>2020</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-user-friends"></i>
+                <h3>Members</h3>
+                <p>50/100</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-gamepad"></i>
+                <h3>Primary Game</h3>
+                <p>Call of Duty: Warzone</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-quote-right"></i>
+                <h3>Clan Motto</h3>
+                <p>"Victory Through Unity"</p>
+            </div>
+            <div class="clan-detail-item fade-in">
+                <i class="fas fa-trophy"></i>
+                <h3>Monthly Tournament</h3>
+                <p>MP & BR Modes</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <h2 class="section-title fade-in">Clan Features</h2>
+        <div class="features">
+            <div class="feature fade-in">
+                <i class="fas fa-trophy feature-icon"></i>
+                <h3>Competitive Play</h3>
+                <p>Participate in high-stakes tournaments and clan wars. Prove your skills against the best players worldwide.</p>
+            </div>
+            <div class="feature fade-in">
+                <i class="fas fa-users feature-icon"></i>
+                <h3>Active Community</h3>
+                <p>Join a vibrant community of dedicated players. Make friends, form teams, and enjoy gaming together.</p>
+            </div>
+            <div class="feature fade-in">
+                <i class="fas fa-graduation-cap feature-icon"></i>
+                <h3>Skill Development</h3>
+                <p>Improve your gameplay with expert strategies and tips. Regular training sessions and workshops to enhance your skills.</p>
+            </div>
+            <div class="feature fade-in">
+                <i class="fas fa-headset feature-icon"></i>
+                <h3>Professional Coaching</h3>
+                <p>Get personalized coaching from experienced players. Learn advanced tactics and improve your game sense.</p>
+            </div>
+            <div class="feature fade-in">
+                <i class="fas fa-medal feature-icon"></i>
+                <h3>Exclusive Rewards</h3>
+                <p>Earn unique in-game items and real-world prizes. Regular clan events with exciting rewards for top performers.</p>
+            </div>
+            <div class="feature fade-in">
+                <i class="fas fa-robot feature-icon"></i>
+                <h3>AI Chatbot Support</h3>
+                <p>Meet Ƭꪝ・MIKASA, our AI-powered chatbot. Get instant answers to your questions and assistance with clan-related queries.</p>
+            </div>
+            <div class="feature fade-in">
+                <i class="fas fa-calendar-check feature-icon"></i>
+                <h3>Monthly Tournaments</h3>
+                <p>Compete in our monthly tournaments featuring both Multiplayer and Battle Royale modes. Win big prizes and glory for your team!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requirements Section -->
+    <section id="requirements" class="requirements">
+        <h2 class="section-title fade-in">Clan Requirements</h2>
+        <ul class="requirement-list">
+            <li class="fade-in">Minimum K/D ratio of 1.5 in ranked matches</li>
+            <li class="fade-in">Player level 50 or higher in Call of Duty</li>
+            <li class="fade-in">Active participation in clan activities and events</li>
+            <li class="fade-in">Microphone for team communication during matches</li>
+            <li class="fade-in">Positive attitude and team spirit</li>
+            <li class="fade-in">Commitment to regular practice and skill improvement</li>
+            <li class="fade-in">Ability to follow team strategies and communicate effectively</li>
+            <li class="fade-in">Must use clan tag Ƭꪝ・ in-game</li>
+        </ul>
+        <h3 class="section-title fade-in">Clan Roles</h3>
+        <ul class="requirement-list">
+            <li class="fade-in">Clan Leader: Oversees all clan activities and makes strategic decisions</li>
+            <li class="fade-in">Co-Leaders: Assist the Clan Leader in management and decision-making</li>
+            <li class="fade-in">Elders: Experienced members who help with recruitment and training</li>
+            <li class="fade-in">Members: Active players who participate in clan wars and events</li>
+            <li class="fade-in">Recruits: New members on probation, proving their worth to the clan</li>
+        </ul>
+    </section>
+
+    <!-- Join Section -->
+    <section class="join-section" id="join">
+        <form class="recruitment-form" id="recruitmentForm">
+            <span class="close-form" id="closeForm">&times;</span>
+            <h2>Join THE WARLORDS</h2>
+            <div class="form-group">
+                <label for="username">In-game Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="userId">User ID</label>
+                <input type="text" id="userId" required>
+            </div>
+            <div class="form-group">
+                <label for="level">Game Level</label>
+                <input type="number" id="level" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="kd">K/D Ratio</label>
+                <input type="number" id="kd" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <button type="submit" class="cyberpunk-button">Apply Now</button>
+        </form>
+    </section>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        <h3>Application Submitted Successfully!</h3>
+        <p>We'll contact you soon via WhatsApp.</p>
+    </div>
+
+    <section id="discover-more" class="discover-more">
+        <h2 class="section-title fade-in">Discover More About THE WARLORDS</h2>
+        <button class="cyberpunk-button" id="discoverMoreBtn">Explore</button>
+    </section>
+
+    <div id="comingSoonMessage" class="coming-soon-message">
+        <p>Coming Soon!</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About THE WARLORDS</h3>
+                <p>Elite gaming clan dedicated to competitive play and skill development in Call of Duty.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: contact@thewarlords.com</p>
+                <p>Discord: discord.gg/thewarlords</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="https://abopu321.github.io/Afrox" target="_blank"><i class="fab fa-facebook"></i></a>
+                    <a href="https://abopu321.github.io/Afrox" target="_blank"><i class="fab fa-youtube"></i></a>
+                    <a href="https://abopu321.github.io/Afrox" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://abopu321.github.io/Afrox" target="_blank"><i class="fab fa-discord"></i></a>
+                    <a href="https://abopu321.github.io/Afrox" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2023 THE WARLORDS. All rights reserved.</p>
+    </footer>
+
+    <!-- AI Chatbot Button -->
+    <div class="ai-chatbot">
+        <button class="ai-chatbot-button" id="askTWAI">
+            <i class="fas fa-robot"></i>
+        </button>
+    </div>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb7V2EI7ws32qC6Yny6yCzTRUK8qc",
+            authDomain: "tok-tak-by-ab.firebaseapp.com",
+            databaseURL: "https://tok-tak-by-ab-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tok-tak-by-ab",
+            storageBucket: "tok-tak-by-ab.appspot.com",
+            messagingSenderId: "210261269424",
+            appId: "1:210261269424:web:1300865fddf4a2fd00d475",
+            measurementId: "G-4LPY69JQXB"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Check if Firebase is initialized correctly
+        if (!firebase.apps.length) {
+            console.error("Firebase is not initialized!");
+        } else {
+            console.log("Firebase is initialized successfully");
+        }
+
+        // Get a reference to the database service
+        const database = firebase.database();
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const nav = document.getElementById('mainNav');
+            const joinButton = document.getElementById('joinButton');
+            const recruitmentForm = document.getElementById('recruitmentForm');
+            const closeForm = document.getElementById('closeForm');
+            const successMessage = document.getElementById('successMessage');
+            const askTWAI = document.getElementById('askTWAI');
+            const discoverMoreBtn = document.getElementById('discoverMoreBtn');
+            const comingSoonMessage = document.getElementById('comingSoonMessage');
+
+            // Background Animation
+            const bgAnimation = document.getElementById('bgAnimation');
+            for (let i = 0; i < 50; i++) {
+                const span = document.createElement('span');
+                span.style.left = Math.random() * 100 + 'vw';
+                span.style.animationDuration = Math.random() * 3 + 2 + 's';
+                span.style.animationDelay = Math.random() * 2 + 's';
+                bgAnimation.appendChild(span);
+            }
+
+            // Navigation background on scroll
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+            });
+
+            // Join button functionality
+            joinButton.addEventListener('click', () => {
+                recruitmentForm.classList.add('active');
+                recruitmentForm.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Close form functionality
+            closeForm.addEventListener('click', () => {
+                recruitmentForm.classList.remove('active');
+            });
+
+            // Form submission
+            recruitmentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+    
+                // Collect form data
+                const username = document.getElementById('username').value;
+                const userId = document.getElementById('userId').value;
+                const level = document.getElementById('level').value;
+                const kd = document.getElementById('kd').value;
+                const phone = document.getElementById('phone').value;
+
+                // Save to Firebase
+                database.ref('applications').push({
+                    name: {
+                        username: username,
+                        userId: userId
+                    },
+                    level: level,
+                    kd: kd,
+                    phone: phone,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    console.log("Application saved successfully");
+                    
+                    // Prepare WhatsApp message
+                    const message = `New Clan Application:
+Username: ${username}
+User ID: ${userId}
+Level: ${level}
+K/D Ratio: ${kd}
+Phone: ${phone}`;
+
+                    // Send WhatsApp message
+                    const adminWhatsApp = "+8801799211672";
+                    const whatsappLink = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappLink, '_blank');
+
+                    // Show success message
+                    successMessage.classList.add('active');
+                    
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.classList.remove('active');
+                        recruitmentForm.reset();
+                        recruitmentForm.classList.remove('active');
+                    }, 3000);
+                }).catch((error) => {
+                    console.error("Error saving application: ", error);
+                    alert("There was an error submitting your application. Please try again.");
+                });
+            });
+
+            // AI Chatbot functionality
+            askTWAI.addEventListener('click', () => {
+                window.open('https://abopu321.github.io/Afrox', '_blank');
+            });
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                                        e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            discoverMoreBtn.addEventListener('click', () => {
+                comingSoonMessage.style.display = 'block';
+                setTimeout(() => {
+                    comingSoonMessage.style.display = 'none';
+                }, 3000);
+            });
+
+            // Scroll animation
+            const fadeInElements = document.querySelectorAll('.fade-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    } else {
+                        entry.target.classList.remove('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            fadeInElements.forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>
+
